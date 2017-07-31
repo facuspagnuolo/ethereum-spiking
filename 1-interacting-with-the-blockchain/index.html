@@ -1,0 +1,63 @@
+<html>
+<header>
+  <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+  <style>
+    #transaction-box, #accounts-box { width: 100%; float: left; }
+    #gas-price { color: grey; }
+    #transaction { color: grey; font-size: 12px; }
+    #errors { background-color: #ffd6c8; color: darkred; }
+    #sender-address, #recipient-address { width: 300px; }
+    .balance { color: grey; width: 70px; }
+    #accounts { list-style: none; }
+    .from, .to { color: blue !important; }
+    #send-transaction-form { float: left; width: 40%; margin-right: 8%; }
+    #transaction-info { background-color: darkgrey; width: 50%; float: left; border: grey 1px solid; }
+    #transaction-info p { margin: -15px 2px; }
+    .form-input { width: 100%; height: 20px; }
+    .form-input label { width: 20%; float: left; }
+    .form-input input { float: left; }
+  </style>
+</header>
+<body>
+  <div id="app">
+    <div id="errors"></div>
+    <div id="transaction-box">
+      <div id="send-transaction-form">
+        <p id="gas-price"></p>
+        <h3>Transaction <em id="transaction"></em></h3>
+        <div class="form-input">
+          <label for="sender-address">From (address)</label>
+          <input id="sender-address" placeholder="From (address)"/>
+        </div>
+        <div class="form-input">
+          <label for="recipient-address">To (address)</label>
+          <input id="recipient-address" placeholder="To (address)"/>
+        </div>
+        <div class="form-input">
+          <label for="amount">Amount (wei)</label>
+          <input id="amount" placeholder="Amount (wei)"/>
+        </div>
+        <button id="send-ether">Send</button>
+      </div>
+      <pre id="transaction-info">
+        <p><b>Hash:</b> <span id="hash"></span></p>
+        <p><b>Nonce:</b> <span id="nonce"></span></p>
+        <p><b>Gas usage:</b> <span id="gas-usage"></span></p>
+        <p><b>Block Number:</b> <span id="block-number"></span></p>
+        <p><b>Block Hash:</b> <span id="block-hash"></span></p>
+        <p><b>Tx Index:</b> <span id="transaction-index"></span></p>
+        <p><b>From:</b> <span id="from"></span></p>
+        <p><b>To:</b> <span id="to"></span></p>
+        <p><b>Value:</b> <span id="value"></span></p>
+      </pre>
+    </div>
+    <div id="accounts-box">
+      <hr>
+      <h3>Accounts</h3>
+      <div id="default-account"></div>
+      <pre id="accounts"></pre>
+    </div>
+  </div>
+  <script type="application/javascript" src="./bundle.js"></script>
+</body>
+</html>
