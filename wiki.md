@@ -74,6 +74,15 @@ It has a maximum size of 1024 elements and contains words of 256 bits.
 The instruction set of the EVM is kept minimal in order to avoid incorrect implementations which could cause consensus problems.
 All instructions operate on the basic data type, 256-bit words.
 
+## Technical
+### TestRPC
+Node.js based Ethereum client for testing and development. It uses ethereumjs to simulate full client behavior and make developing Ethereum applications much faster.
+It creates 10 accounts by default, all of them unlocked.
+
+### ABI [link](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI)
+Is an interface or template of a contract which tells the contract user what methods are available in the contract.
+Whenever you have to interact with the contract, you will need the ABI.
+
 ## Complementary
 ### The DAO
 The DAO was a digital DAO, meant to operate like a venture capital fund providing a new descentralized business model for organizing commercial and non-profit enterprises.

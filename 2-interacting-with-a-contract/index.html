@@ -1,0 +1,81 @@
+<html>
+<header>
+  <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <style>
+    .container { width: 100% !important; }
+    #gas-price, #transaction-hash { color: grey; font-size: 12px; }
+    #errors { background-color: #ffd6c8; color: darkred; }
+    #accounts { list-style: none; }
+    .balance { color: grey; width: 70px; }
+    .from, .to, .transaction { color: blue !important; }
+    #transaction-info { background-color: darkgrey; border: grey 1px solid; margin-top: 30px; }
+    #transaction-info p { margin: -13px 2px; }
+  </style>
+</header>
+<body>
+  <div id="app" class="container">
+    <div id="errors"></div>
+    <div class="row">
+      <div class="col-sm-6">
+        <h3>Accounts</h3>
+        <div id="default-account"></div>
+        <pre id="accounts"></pre>
+      </div>
+      <div class="col-sm-6">
+        <h3>Transaction Information</h3>
+        <pre id="transaction-info">
+          <p><b>Hash:</b> <span id="hash"></span></p>
+          <p><b>Nonce:</b> <span id="nonce"></span></p>
+          <p><b>Gas usage:</b> <span id="gas-usage"></span></p>
+          <p><b>Block Number:</b> <span id="block-number"></span></p>
+          <p><b>Block Hash:</b> <span id="block-hash"></span></p>
+          <p><b>Tx Index:</b> <span id="transaction-index"></span></p>
+          <p><b>From:</b> <span id="from"></span></p>
+          <p><b>To:</b> <span id="to"></span></p>
+          <p><b>Value:</b> <span id="value"></span></p>
+        </pre>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-6">
+        <h3>MyToken Balances</h3>
+        <div class="form-group row">
+          <label for="contract-address" class="col-sm-3 col-form-label">MyToken Contract (address)</label>
+          <div class="col-sm-9"><input class="form-control" id="contract-address"></div>
+        </div>
+        <pre id="my-token-balances">
+        </pre>
+      </div>
+      <div class="col-sm-6" id="send-transaction-form">
+        <h3>Buy some tokens</h3>
+        <p id="transaction-hash">Tx Hash: </p>
+        <p id="gas-price"></p>
+        <div class="form-group row">
+          <label for="seller-address" class="col-sm-3 col-form-label">Seller (address)</label>
+          <div class="col-sm-9"><input class="form-control" id="seller-address"></div>
+        </div>
+        <div class="form-group row">
+          <label for="buyer-address" class="col-sm-3 col-form-label">Buyer (address)</label>
+          <div class="col-sm-9"><input class="form-control" id="buyer-address"></div>
+        </div>
+        <div class="form-group row">
+          <label for="buying-amount" class="col-sm-3 col-form-label">Amount</label>
+          <div class="col-sm-4"><input class="form-control" id="buying-amount"></div>
+        </div>
+        <button id="buy" class="btn btn-primary">Buy</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <h3>Transactions List</h3>
+        <pre id="transactions-list">
+        </pre>
+      </div>
+    </div>
+  </div>
+  <script type="application/javascript" src="./bundle.js"></script>
+</body>
+</html>
