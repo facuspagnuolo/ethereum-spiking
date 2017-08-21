@@ -4,7 +4,6 @@ contract MyToken {
   address public creator;
   mapping (address => uint256) public balances;
 
-  event Log(string message, uint256 amount, uint256 balance);
   event TokenTransfer(address from, address to, uint256 amount);
 
   function MyToken(uint256 amount) {
