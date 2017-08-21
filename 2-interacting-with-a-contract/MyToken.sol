@@ -12,8 +12,8 @@ contract MyToken {
   function sendTokens(address receiver, uint256 amount) returns (bool) {
     address owner = msg.sender;
 
-    if (amount <= 0) return false;
-    if (balances[owner] < amount) return false;
+    require(amount <= 0);
+    require(balances[owner] < amount);
 
     balances[owner] -= amount;
     balances[receiver] += amount;

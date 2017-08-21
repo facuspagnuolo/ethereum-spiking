@@ -31,9 +31,9 @@ contract TokenSale {
     uint weiAmount = msg.value;
     uint256 amount = token.balanceOf(this);
 
-    if (amount <= 0) return;
-    if (tokenSaleClosed) return;
-    if (weiAmount != priceInWei) return;
+    require(amount > 0);
+    require(!tokenSaleClosed);
+    require(weiAmount == priceInWei);
 
     tokenSaleClosed = true;
 

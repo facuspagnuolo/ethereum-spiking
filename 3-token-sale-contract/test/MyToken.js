@@ -43,14 +43,7 @@ contract('MyToken', accounts => {
       const sendingAmount = new BigNumber(101);
 
       it('does not allow the owner to send that amount and does not send anything', async function () {
-        const result = await myToken.sendTokens(receiver, sendingAmount, { from: owner });
-
-        const ownerBalance = await myToken.balanceOf(owner);
-        const receiverBalance = await myToken.balanceOf(receiver);
-
-        ownerBalance.should.be.bignumber.equal(new BigNumber(100));
-        receiverBalance.should.be.bignumber.equal(new BigNumber(0));
-        result.logs.should.be.empty;
+        await itDoesNotSendAmount(sendingAmount);
       });
     });
 
@@ -58,15 +51,22 @@ contract('MyToken', accounts => {
       const sendingAmount = new BigNumber(-100);
 
       it('does not allow the owner to send that amount and does not send anything', async function () {
-        const result = await myToken.sendTokens(receiver, sendingAmount, { from: owner });
-
-        const ownerBalance = await myToken.balanceOf(owner);
-        const receiverBalance = await myToken.balanceOf(receiver);
-
-        ownerBalance.should.be.bignumber.equal(new BigNumber(100));
-        receiverBalance.should.be.bignumber.equal(new BigNumber(0));
-        result.logs.should.be.empty;
+        await itDoesNotSendAmount(sendingAmount);
       });
     });
+
+    async function itDoesNotSendAmount(sendingAmount) {
+      try {
+        await myToken.sendTokens(receiver, sendingAmount, {from: owner});
+      } catch (error) {
+        error.message.search('invalid opcode').should.be.above(0);
+      }
+
+      const ownerBalance = await myToken.balanceOf(owner);
+      const receiverBalance = await myToken.balanceOf(receiver);
+
+      ownerBalance.should.be.bignumber.equal(new BigNumber(100));
+      receiverBalance.should.be.bignumber.equal(new BigNumber(0));
+    }
   });
 });

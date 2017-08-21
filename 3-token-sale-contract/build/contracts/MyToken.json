@@ -1,0 +1,112 @@
+{
+  "contract_name": "MyToken",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "creator",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "sendTokens",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "balances",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenTransfer",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000f57600080fd5b6040516020806102a2833981016040528080519150505b60008054600160a060020a03191633600160a060020a03908116919091178083551681526001602052604090208190555b505b61023a806100686000396000f300606060405263ffffffff60e060020a60003504166302d05d3f811461004557806305ab421d1461007457806327e235e3146100aa57806370a08231146100db575b600080fd5b341561005057600080fd5b61005861010c565b604051600160a060020a03909116815260200160405180910390f35b341561007f57600080fd5b610096600160a060020a036004351660243561011b565b604051901515815260200160405180910390f35b34156100b557600080fd5b6100c9600160a060020a03600435166101dd565b60405190815260200160405180910390f35b34156100e657600080fd5b6100c9600160a060020a03600435166101ef565b60405190815260200160405180910390f35b600054600160a060020a031681565b60003381831161012a57600080fd5b600160a060020a0381166000908152600160205260409020548390101561015057600080fd5b600160a060020a038082166000908152600160205260408082208054879003905591861681528190208054850190557fd0ed88a3f042c6bbb1e3ea406079b5f2b4b198afccaa535d837f4c63abbc4de69082908690869051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a1600191505b5092915050565b60016020526000908152604090205481565b600160a060020a0381166000908152600160205260409020545b9190505600a165627a7a72305820876a726393a882508d00078535c70e77c1b224767810c02454839f7a8135accb0029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1503332041001
+}
