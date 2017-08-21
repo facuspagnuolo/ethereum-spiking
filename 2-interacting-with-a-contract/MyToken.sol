@@ -1,23 +1,26 @@
 pragma solidity ^0.4.4;
 
 contract MyToken {
-  address seller;
+  address creator;
   mapping (address => uint256) balances;
 
   function MyToken(uint256 amount) {
-    seller = msg.sender;
-    balances[seller] = amount;
+    creator = msg.sender;
+    balances[creator] = amount;
   }
 
   function sendTokens(address receiver, uint256 amount) returns (bool) {
+    address owner = msg.sender;
+
     if (amount <= 0) return false;
-    if (balances[msg.sender] < amount) return false;
-    balances[msg.sender] -= amount;
+    if (balances[owner] < amount) return false;
+
+    balances[owner] -= amount;
     balances[receiver] += amount;
     return true;
   }
 
-  function balanceOf(address owner) returns (uint256) {
+  function balanceOf(address owner) constant returns (uint256) {
     return balances[owner];
   }
 }
