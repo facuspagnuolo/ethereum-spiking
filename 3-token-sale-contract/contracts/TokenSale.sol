@@ -5,30 +5,41 @@ import './MyToken.sol';
 contract TokenSale {
   MyToken public token;
   address public seller;
+  uint public priceInWei;
   bool public tokenSaleClosed;
-  uint256 public priceInEther;
-  uint256 public amountOfTokens;
 
-  function TokenSale(MyToken _token, uint256 _amountOfTokens, uint256 _price) {
-    if (_price <= 0) return;
-    if (_amountOfTokens <= 0) return;
+  event TokenPurchase(address buyer, address seller, uint256 price, uint256 amount);
+
+  function TokenSale(MyToken _token, uint _price) {
+    if (_price < 0) return;
+
     token = _token;
     seller = msg.sender;
-    priceInEther = _price * 1 ether;
-    amountOfTokens = _amountOfTokens;
+    priceInWei = _price;
     tokenSaleClosed = false;
   }
 
+  function amount() constant returns(uint256) {
+    return token.balanceOf(this);
+  }
+
   function () payable {
-    address buyer = msg.sender;
-    uint amountInEther = msg.value;
+    buyTokens(msg.sender);
+  }
 
+  function buyTokens(address buyer) payable {
+    uint weiAmount = msg.value;
+    uint256 amount = token.balanceOf(this);
+
+    if (amount <= 0) return;
     if (tokenSaleClosed) return;
-    if (amountInEther < priceInEther) return;
-    if (token.balanceOf(seller) < amountOfTokens) return;
+    if (weiAmount != priceInWei) return;
 
-    token.sendTokens(buyer, amountOfTokens);
-    seller.transfer(amountInEther);
     tokenSaleClosed = true;
+
+    if(token.sendTokens(buyer, amount)) {
+      seller.transfer(weiAmount);
+      TokenPurchase(buyer, seller, weiAmount, amount);
+    }
   }
 }

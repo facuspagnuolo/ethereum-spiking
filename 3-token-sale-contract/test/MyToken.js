@@ -17,7 +17,7 @@ contract('MyToken', accounts => {
   });
 
   it('should be initialized with given amount', async function () {
-    const balance = await myToken.balanceOf.call(owner);
+    const balance = await myToken.balanceOf(owner);
     balance.should.be.bignumber.equal(initialAmountOfTokens)
   });
 
@@ -28,12 +28,14 @@ contract('MyToken', accounts => {
       const sendingAmount = new BigNumber(10);
 
       it('allows the owner to send that amount of tokens', async function () {
-        await myToken.sendTokens(receiver, sendingAmount, { from: owner });
-        const ownerBalance = await myToken.balanceOf.call(owner);
-        const receiverBalance = await myToken.balanceOf.call(receiver);
+        const result = await myToken.sendTokens(receiver, sendingAmount, { from: owner });
+
+        const ownerBalance = await myToken.balanceOf(owner);
+        const receiverBalance = await myToken.balanceOf(receiver);
 
         ownerBalance.should.be.bignumber.equal(new BigNumber(90));
         receiverBalance.should.be.bignumber.equal(new BigNumber(10));
+        result.logs[0].event.should.be.equal('TokenTransfer');
       });
     });
 
@@ -41,13 +43,14 @@ contract('MyToken', accounts => {
       const sendingAmount = new BigNumber(101);
 
       it('does not allow the owner to send that amount and does not send anything', async function () {
-        await myToken.sendTokens(receiver, sendingAmount, { from: owner });
+        const result = await myToken.sendTokens(receiver, sendingAmount, { from: owner });
 
-        const ownerBalance = await myToken.balanceOf.call(owner);
-        const receiverBalance = await myToken.balanceOf.call(receiver);
+        const ownerBalance = await myToken.balanceOf(owner);
+        const receiverBalance = await myToken.balanceOf(receiver);
 
         ownerBalance.should.be.bignumber.equal(new BigNumber(100));
         receiverBalance.should.be.bignumber.equal(new BigNumber(0));
+        result.logs.should.be.empty;
       });
     });
 
@@ -55,13 +58,14 @@ contract('MyToken', accounts => {
       const sendingAmount = new BigNumber(-100);
 
       it('does not allow the owner to send that amount and does not send anything', async function () {
-        await myToken.sendTokens(receiver, sendingAmount, { from: owner });
+        const result = await myToken.sendTokens(receiver, sendingAmount, { from: owner });
 
-        const ownerBalance = await myToken.balanceOf.call(owner);
-        const receiverBalance = await myToken.balanceOf.call(receiver);
+        const ownerBalance = await myToken.balanceOf(owner);
+        const receiverBalance = await myToken.balanceOf(receiver);
 
         ownerBalance.should.be.bignumber.equal(new BigNumber(100));
         receiverBalance.should.be.bignumber.equal(new BigNumber(0));
+        result.logs.should.be.empty;
       });
     });
   });

@@ -19,6 +19,7 @@
     "mocha": "^3.5.0",
     "solc": "~0.4.15",
     "truffle": "^3.4.8",
+    "truffle-contract": "^2.0.5",
     "watchify": "~3.9.0",
     "web3": "~0.20.1"
   },
