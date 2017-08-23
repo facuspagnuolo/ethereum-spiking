@@ -19,13 +19,18 @@ contract TokenPurchase is Ownable {
     tokenPurchaseOpened = false;
   }
 
+  function priceInWei() constant returns(uint) {
+    return this.balance;
+  }
+
   function () payable onlyOwner {
     require(msg.value > 0);
+
     tokenPurchaseOpened = true;
   }
 
   function claim(TokenPurchaseAcceptance acceptance) onlyOwner returns(bool){
-    address seller = acceptance.seller();
+    address seller = acceptance.owner();
     uint256 acceptanceAmount = token.balanceOf(address(acceptance));
 
     require(tokenPurchaseOpened);
@@ -33,20 +38,10 @@ contract TokenPurchase is Ownable {
 
     tokenPurchaseOpened = false;
 
-    if(acceptance.claim()) {
-      uint balance = this.balance;
-      seller.transfer(balance);
-      TokenSold(owner, seller, balance, amount);
-      return true;
-    }
-    return false;
-  }
-
-  function buyer() constant returns(address) {
-    return owner;
-  }
-
-  function priceInWei() constant returns(uint) {
-    return this.balance;
+    if(!acceptance.claim()) revert();
+    uint balance = this.balance;
+    seller.transfer(balance);
+    TokenSold(owner, seller, balance, amount);
+    return true;
   }
 }

@@ -35,7 +35,7 @@ const TokenPurchaseAcceptaces = {
       const erc20 = await ERC20.at(erc20Address)
       const tokenPurchaseAddress = await acceptance.tokenPurchase()
       const tokenPurchase = await TokenPurchase.at(tokenPurchaseAddress)
-      const buyerAddress = await tokenPurchase.buyer();
+      const buyerAddress = await tokenPurchase.owner();
 
       console.log(`Buyer ${buyerAddress} claiming ${tokenPurchaseAddress} through acceptance ${acceptance.address}`);
       const response = await tokenPurchase.claim(acceptance.address, { from: buyerAddress, gas: GAS })

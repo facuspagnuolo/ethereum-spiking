@@ -17,10 +17,6 @@ contract TokenPurchaseAcceptance is Ownable {
     tokenPurchase = _tokenPurchase;
   }
 
-  function seller() constant returns(address) {
-    return owner;
-  }
-
   function tokensBalance() constant returns(uint256) {
     return token.balanceOf(this);
   }
@@ -31,7 +27,7 @@ contract TokenPurchaseAcceptance is Ownable {
 
     claimed = true;
 
-    address buyer = tokenPurchase.buyer();
+    address buyer = tokenPurchase.owner();
     uint256 balance = tokensBalance();
     token.transfer(buyer, balance);
     Claimed(buyer, owner, balance);

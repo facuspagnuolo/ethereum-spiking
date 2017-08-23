@@ -6,24 +6,20 @@ import '../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
 contract TokenSale is Ownable {
   ERC20 public token;
   uint public priceInWei;
-  bool public tokenSaleClosed;
+  bool public closed;
 
   event TokenPurchase(address buyer, address seller, uint256 price, uint256 amount);
 
   function TokenSale(ERC20 _token, uint _price) {
-    if (_price < 0) return;
+    if (_price < 0) revert();
 
     token = _token;
     priceInWei = _price;
-    tokenSaleClosed = false;
+    closed = false;
   }
 
   function amount() constant returns(uint256) {
     return token.balanceOf(this);
-  }
-
-  function seller() constant returns(address) {
-    return owner;
   }
 
   function () payable {
@@ -35,14 +31,13 @@ contract TokenSale is Ownable {
     uint256 amount = token.balanceOf(this);
 
     require(amount > 0);
-    require(!tokenSaleClosed);
+    require(!closed);
     require(weiAmount == priceInWei);
 
-    tokenSaleClosed = true;
+    closed = true;
 
-    if(token.transfer(buyer, amount)) {
-      owner.transfer(weiAmount);
-      TokenPurchase(buyer, owner, weiAmount, amount);
-    }
+    if(!token.transfer(buyer, amount)) revert();
+    owner.transfer(weiAmount);
+    TokenPurchase(buyer, owner, weiAmount, amount);
   }
 }

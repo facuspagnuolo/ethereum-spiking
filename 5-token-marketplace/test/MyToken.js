@@ -28,7 +28,7 @@ contract('MyToken', accounts => {
       const sendingAmount = new BigNumber(10);
 
       it('allows the owner to send that amount of tokens', async function () {
-        const result = await myToken.sendTokens(receiver, sendingAmount, { from: owner });
+        const result = await myToken.transfer(receiver, sendingAmount, { from: owner });
 
         const ownerBalance = await myToken.balanceOf(owner);
         const receiverBalance = await myToken.balanceOf(receiver);
@@ -57,7 +57,7 @@ contract('MyToken', accounts => {
 
     async function itDoesNotSendAmount(sendingAmount) {
       try {
-        await myToken.sendTokens(receiver, sendingAmount, {from: owner});
+        await myToken.transfer(receiver, sendingAmount, {from: owner});
       } catch (error) {
         error.message.search('invalid opcode').should.be.above(0);
       }

@@ -15,7 +15,7 @@ const TokenSales = {
     try {
       list.find(`#${address}`).find(".tokens").html(`Tokens ${(await tokenSale.amount())}`)
       list.find(`#${address}`).find(".price").html(`Wei ${(await tokenSale.priceInWei())}`)
-      list.find(`#${address}`).find(".closed").html(`Closed ${(await tokenSale.tokenSaleClosed())}`)
+      list.find(`#${address}`).find(".closed").html(`Closed ${(await tokenSale.closed())}`)
     } catch(error) { showError(error) }
   },
 

@@ -27,24 +27,24 @@ contract('TokenSale', accounts => {
       });
 
       it('is initialized with a price, the seller, the tokens contract but no tokens for sale', async function () {
-        const seller = await tokenSale.seller();
+        const seller = await tokenSale.owner();
         const amount = await tokenSale.amount();
         const tokenAddress = await tokenSale.token();
         const sellingPrice = await tokenSale.priceInWei();
-        const tokenSaleClosed = await tokenSale.tokenSaleClosed();
+        const closed = await tokenSale.closed();
 
         seller.should.be.equal(owner);
         amount.should.be.bignumber.equal(0);
         tokenAddress.should.be.equal(myToken.address);
         sellingPrice.should.be.bignumber.equal(sellingPriceInWei);
-        tokenSaleClosed.should.be.false;
+        closed.should.be.false;
       });
 
       describe('when the owner transfer some tokens to the sale contract', async function() {
         const amountOfTokens = new BigNumber(10);
 
         beforeEach(async function() {
-          await myToken.sendTokens(tokenSale.address, amountOfTokens, { from: owner });
+          await myToken.transfer(tokenSale.address, amountOfTokens, { from: owner });
         });
 
         it('has some tokens for sale', async function () {
@@ -89,17 +89,17 @@ contract('TokenSale', accounts => {
             it('changes the state of the token sale contract', async function() {
               await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount });
 
-              const seller = await tokenSale.seller();
+              const seller = await tokenSale.owner();
               const amount = await tokenSale.amount();
               const tokenAddress = await tokenSale.token();
               const sellingPrice = await tokenSale.priceInWei();
-              const tokenSaleClosed = await tokenSale.tokenSaleClosed();
+              const closed = await tokenSale.closed();
 
               seller.should.be.equal(owner);
               amount.should.be.bignumber.equal(0);
               tokenAddress.should.be.equal(myToken.address);
               sellingPrice.should.be.bignumber.equal(sellingPriceInWei);
-              tokenSaleClosed.should.be.true;
+              closed.should.be.true;
             });
 
             it('triggers a purchase event', async function () {
@@ -170,11 +170,11 @@ contract('TokenSale', accounts => {
           error.message.search('invalid opcode').should.be.above(0);
         }
 
-        const seller = await tokenSale.seller();
+        const seller = await tokenSale.owner();
         const amount = await tokenSale.amount();
         const tokenAddress = await tokenSale.token();
         const sellingPrice = await tokenSale.priceInWei();
-        const tokenSaleClosed = await tokenSale.tokenSaleClosed();
+        const closed = await tokenSale.closed();
         const buyerTokens = await myToken.balanceOf(buyer);
         const ownerTokens = await myToken.balanceOf(owner);
         const contractTokens = await myToken.balanceOf(tokenSale.address);
@@ -183,7 +183,7 @@ contract('TokenSale', accounts => {
         amount.should.be.bignumber.equal(sellingAmountOfTokens);
         tokenAddress.should.be.equal(myToken.address);
         sellingPrice.should.be.bignumber.equal(sellingPriceInWei);
-        tokenSaleClosed.should.be.false;
+        closed.should.be.false;
 
         buyerTokens.should.be.bignumber.equal(new BigNumber(0));
         contractTokens.should.be.bignumber.equal(sellingAmountOfTokens);

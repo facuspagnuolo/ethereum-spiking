@@ -56,7 +56,7 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "tokenSaleClosed",
+      "name": "closed",
       "outputs": [
         {
           "name": "",

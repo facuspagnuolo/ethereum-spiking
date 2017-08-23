@@ -47,7 +47,7 @@ contract('TokenPurchaseAcceptance', accounts => {
 
         describe('when someone claims those tokens', async function () {
           beforeEach(async function () {
-            await myToken.sendTokens(acceptance.address, buyingAmountOfTokens, { from: owner });
+            await myToken.transfer(acceptance.address, buyingAmountOfTokens, { from: owner });
           });
 
           describe('when the claimer is the purchase contract', async function() {

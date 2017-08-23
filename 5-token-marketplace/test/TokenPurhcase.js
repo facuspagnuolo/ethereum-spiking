@@ -29,7 +29,7 @@ contract('TokenPurchase', accounts => {
       });
 
       it('is initialized with the buyer, the amount of tokens to buy, and the tokens contract', async function () {
-        const buyer = await tokenPurchase.buyer();
+        const buyer = await tokenPurchase.owner();
         const amount = await tokenPurchase.amount();
         const tokenAddress = await tokenPurchase.token();
 
@@ -104,7 +104,7 @@ contract('TokenPurchase', accounts => {
 
               describe('when the owner transfers the requested amount of tokens to the acceptance contract', async function () {
                 beforeEach(async function() {
-                  await myToken.sendTokens(acceptance.address, buyingAmountOfTokens, { from: owner });
+                  await myToken.transfer(acceptance.address, buyingAmountOfTokens, { from: owner });
                 });
 
                 describe('when the owner claims the money to the buyer', async function () {
