@@ -1,6 +1,6 @@
 import $ from 'jquery'
 import { GAS, showError } from "./constants"
-import { MyToken, TokenSale } from "./contracts"
+import { ERC20, TokenSale } from "./contracts"
 import Accounts from "./accounts"
 import Transactions from "./transactions"
 
@@ -19,16 +19,16 @@ const TokenSales = {
     } catch(error) { showError(error) }
   },
 
-  async publish(myTokenContractAddress, seller, amount, price) {
-    console.log(`Selling ${amount} tokens at ${myTokenContractAddress} from ${seller} by Wei ${price}`)
+  async publish(erc20Address, seller, amount, price) {
+    console.log(`Selling ${amount} tokens at ${erc20Address} from ${seller} by Wei ${price}`)
     try {
-      const myToken = await MyToken.at(myTokenContractAddress)
-      const tokenSale = await TokenSale.new(myTokenContractAddress, price, { from: seller, gas: GAS })
+      const erc20 = await ERC20.at(erc20Address)
+      const tokenSale = await TokenSale.new(erc20Address, price, { from: seller, gas: GAS })
       Transactions.add(tokenSale.transactionHash)
 
-      const response = await myToken.transfer(tokenSale.address, amount, { from: seller, gas: GAS })
+      const response = await erc20.transfer(tokenSale.address, amount, { from: seller, gas: GAS })
       this.update(tokenSale)
-      Accounts.update(myToken)
+      Accounts.update(erc20)
       Transactions.add(response.tx)
     } catch(error) { showError(error) }
   },
@@ -36,13 +36,13 @@ const TokenSales = {
   async apply(contractAddress, buyer) {
     try {
       const tokenSale = await TokenSale.at(contractAddress)
-      const myTokenAddress = await tokenSale.token()
-      const myToken = await MyToken.at(myTokenAddress)
+      const erc20Address = await tokenSale.token()
+      const erc20 = await ERC20.at(erc20Address)
       const weiAmount = await tokenSale.priceInWei()
 
       console.log(`Buying tokens from ${buyer} by Wei ${weiAmount}`)
       const response = await tokenSale.sendTransaction({from: buyer, value: weiAmount})
-      Accounts.update(myToken)
+      Accounts.update(erc20)
       Transactions.add(response.tx)
       this.update(tokenSale)
     } catch(error) { showError(error) }

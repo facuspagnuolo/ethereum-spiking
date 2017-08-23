@@ -3,7 +3,7 @@ import Accounts from './accounts'
 import Transactions from './transactions'
 import TokenPurchases from './tokenpurchases'
 import { GAS, showError } from "./constants"
-import { MyToken, TokenPurchase, TokenPurchaseAcceptance } from "./contracts"
+import { ERC20, TokenPurchase, TokenPurchaseAcceptance } from "./contracts"
 
 const TokenPurchaseAcceptaces = {
   async update(acceptance) {
@@ -19,9 +19,9 @@ const TokenPurchaseAcceptaces = {
     } catch(error) { showError(error) }
   },
 
-  async publish(myTokenAddress, tokenPurchaseAddress, seller) {
+  async publish(erc20Address, tokenPurchaseAddress, seller) {
     try {
-      const acceptance = await TokenPurchaseAcceptance.new(myTokenAddress, tokenPurchaseAddress, { from: seller, gas: GAS })
+      const acceptance = await TokenPurchaseAcceptance.new(erc20Address, tokenPurchaseAddress, { from: seller, gas: GAS })
       Transactions.add(acceptance.transactionHash)
       this.update(acceptance)
       return acceptance
@@ -31,15 +31,15 @@ const TokenPurchaseAcceptaces = {
   async claim(acceptanceAddress) {
     try {
       const acceptance = await TokenPurchaseAcceptance.at(acceptanceAddress)
-      const myTokenAddress = await acceptance.token()
-      const myToken = await MyToken.at(myTokenAddress)
+      const erc20Address = await acceptance.token()
+      const erc20 = await ERC20.at(erc20Address)
       const tokenPurchaseAddress = await acceptance.tokenPurchase()
       const tokenPurchase = await TokenPurchase.at(tokenPurchaseAddress)
       const buyerAddress = await tokenPurchase.buyer();
 
       console.log(`Buyer ${buyerAddress} claiming ${tokenPurchaseAddress} through acceptance ${acceptance.address}`);
       const response = await tokenPurchase.claim(acceptance.address, { from: buyerAddress, gas: GAS })
-      Accounts.update(myToken)
+      Accounts.update(erc20)
       Transactions.add(response.tx)
       TokenPurchases.update(tokenPurchase)
       this.update(acceptance)
