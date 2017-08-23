@@ -7,6 +7,7 @@ import MyTokens from './app/mytokens'
 import TokenSales from './app/tokensales'
 import Transactions from "./app/transactions";
 import TokenPurchases from './app/tokenpurchases'
+import TokenPurchaseAcceptances from './app/tokenpurchaseacceptances'
 
 Accounts.update();
 
@@ -51,7 +52,7 @@ $(document).on('click', '.transaction', e => {
 $(document).on('click', '.claim-acceptance', e => {
   event.preventDefault();
   let acceptanceAddress = $(e.target).siblings(".address").text();
-  TokenPurchases.claim(acceptanceAddress);
+  TokenPurchaseAcceptances.claim(acceptanceAddress);
 });
 
 $('#sell').click(() => {
