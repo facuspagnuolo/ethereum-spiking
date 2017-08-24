@@ -13,13 +13,9 @@ TokenSale.setProvider(provider);
 const TokenPurchase = contract(require('../build/contracts/TokenPurchase.json'));
 TokenPurchase.setProvider(provider);
 
-const TokenPurchaseAcceptance = contract(require('../build/contracts/TokenPurchaseAcceptance.json'));
-TokenPurchaseAcceptance.setProvider(provider);
-
 export {
   MyToken,
   ERC20,
   TokenSale,
   TokenPurchase,
-  TokenPurchaseAcceptance,
 }

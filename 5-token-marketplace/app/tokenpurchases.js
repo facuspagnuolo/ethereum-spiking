@@ -1,7 +1,6 @@
 import $ from 'jquery'
 import Accounts from './accounts'
 import Transactions from './transactions'
-import TokenPurchaseAcceptances from './tokenpurchaseacceptances'
 import { GAS, showError } from "./constants"
 import { ERC20, TokenPurchase } from "./contracts"
 
@@ -16,18 +15,18 @@ const TokenPurchases = {
     try {
       list.find(`#${address}`).find(".tokens").html(`Tokens ${(await tokenPurchase.amount())}`)
       list.find(`#${address}`).find(".price").html(`Wei ${(await tokenPurchase.priceInWei())}`)
-      list.find(`#${address}`).find(".opened").html(`Opened ${(await tokenPurchase.tokenPurchaseOpened())}`)
+      list.find(`#${address}`).find(".opened").html(`Opened ${(await tokenPurchase.opened())}`)
     } catch(error) { showError(error) }
   },
 
-  async publish(erc20Address, buyer, amount, value) {
-    console.log(`Buying ${amount} tokens from ${buyer} by Wei ${value}`);
+  async publish(erc20Address, buyer, amount, price) {
+    console.log(`Buying ${amount} tokens from ${buyer} by Wei ${price}`);
     try {
       const erc20 = await ERC20.at(erc20Address)
-      const tokenPurchase = await TokenPurchase.new(erc20.address, amount, {from: buyer, gas: GAS})
+      const tokenPurchase = await TokenPurchase.new(erc20.address, amount, { from: buyer, gas: GAS })
       Transactions.add(tokenPurchase.transactionHash);
 
-      const response = await tokenPurchase.sendTransaction({from: buyer, value: value, gas: GAS})
+      const response = await tokenPurchase.sendTransaction({ from: buyer, value: price, gas: GAS })
       Accounts.update(erc20);
       Transactions.add(response.tx);
       this.update(tokenPurchase);
@@ -41,12 +40,12 @@ const TokenPurchases = {
       const erc20Address = await tokenPurchase.token()
       const erc20 = await ERC20.at(erc20Address)
       const amount = await tokenPurchase.amount()
-      const acceptance = await TokenPurchaseAcceptances.publish(erc20Address, contractAddress, seller)
+      const approval = await erc20.approve(tokenPurchase.address, amount, { from: seller, gas: GAS })
+      Transactions.add(approval.tx)
 
-      const response = await erc20.transfer(acceptance.address, amount, { from: seller, gas: GAS })
+      const response = await tokenPurchase.claim({ from: seller, gas: GAS })
       Accounts.update(erc20)
       Transactions.add(response.tx)
-      TokenPurchaseAcceptances.update(acceptance)
     } catch(error) { showError(error) }
   },
 

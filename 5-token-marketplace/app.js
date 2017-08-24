@@ -7,7 +7,6 @@ import MyTokens from './app/mytokens'
 import TokenSales from './app/tokensales'
 import Transactions from "./app/transactions";
 import TokenPurchases from './app/tokenpurchases'
-import TokenPurchaseAcceptances from './app/tokenpurchaseacceptances'
 
 Accounts.update();
 
@@ -49,12 +48,6 @@ $(document).on('click', '.transaction', e => {
   Transactions.show(transactionHash);
 });
 
-$(document).on('click', '.claim-acceptance', e => {
-  event.preventDefault();
-  let acceptanceAddress = $(e.target).siblings(".address").text();
-  TokenPurchaseAcceptances.claim(acceptanceAddress);
-});
-
 $('#sell').click(() => {
   let price = $('#tokensale-price').val();
   let amount = $('#tokensale-amount').val();
@@ -71,10 +64,10 @@ $('#apply-sell').click(() => {
 
 $('#buy').click(() => {
   let amount = $('#tokenpurchase-amount').val();
-  let weiAmount = $('#tokenpurchase-value').val();
+  let price = $('#tokenpurchase-price').val();
   let buyerAddress = $('#tokenpurchase-buyer-address').val();
   let tokenContractAddress = $('#tokenpurchase-token-address').val();
-  TokenPurchases.publish(tokenContractAddress, buyerAddress, amount, weiAmount);
+  TokenPurchases.publish(tokenContractAddress, buyerAddress, amount, price);
 });
 
 $('#apply-buy').click(() => {
