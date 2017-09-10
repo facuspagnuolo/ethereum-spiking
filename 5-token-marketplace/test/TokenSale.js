@@ -79,11 +79,10 @@ contract('TokenSale', accounts => {
               const ownerPreEtherBalance = web3.eth.getBalance(owner);
               const buyerPreEtherBalance = web3.eth.getBalance(buyer);
 
-              transaction = await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount });
+              transaction = await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount, gasPrice: 0 });
 
               web3.eth.getBalance(owner).should.bignumber.be.equal(ownerPreEtherBalance.plus(weiSendingAmount));
-              web3.eth.getBalance(buyer).should.bignumber.be.lessThan(buyerPreEtherBalance.minus(weiSendingAmount));
-              // TODO: should be equal? gas?
+              web3.eth.getBalance(buyer).should.bignumber.be.equal(buyerPreEtherBalance.minus(weiSendingAmount));
             });
 
             it('changes the state of the token sale contract', async function() {
@@ -113,7 +112,7 @@ contract('TokenSale', accounts => {
             const weiSendingAmount = sellingPriceInWei - 1;
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(transaction, buyer, amountOfTokens, weiSendingAmount);
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
             });
           });
 
@@ -121,7 +120,7 @@ contract('TokenSale', accounts => {
             const weiSendingAmount = sellingPriceInWei + 1;
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(transaction, buyer, amountOfTokens, weiSendingAmount);
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
             });
           });
         });
@@ -138,7 +137,7 @@ contract('TokenSale', accounts => {
             const weiSendingAmount = sellingPriceInWei;
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(transaction, buyer, amountOfTokens, weiSendingAmount);
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
             });
           });
 
@@ -146,7 +145,7 @@ contract('TokenSale', accounts => {
             const weiSendingAmount = sellingPriceInWei - 1;
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(weiSendingAmount, buyer, amountOfTokens, weiSendingAmount);
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
             });
           });
 
@@ -154,18 +153,18 @@ contract('TokenSale', accounts => {
             const weiSendingAmount = sellingPriceInWei + 1;
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(weiSendingAmount, buyer, amountOfTokens, weiSendingAmount);
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
             });
           });
         });
       });
 
-      async function assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(transaction, buyer, sellingAmountOfTokens, weiSendingAmount) {
+      async function assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, sellingAmountOfTokens, weiSendingAmount) {
         const ownerPreEtherBalance = web3.eth.getBalance(owner);
         const buyerPreEtherBalance = web3.eth.getBalance(buyer);
 
         try {
-          await tokenSale.sendTransaction({from: buyer, value: weiSendingAmount});
+          await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount, gasPrice: 0 });
         } catch(error) {
           error.message.search('invalid opcode').should.be.above(0);
         }
@@ -190,7 +189,7 @@ contract('TokenSale', accounts => {
         ownerTokens.should.be.bignumber.equal(myTokensInitialAmount.minus(sellingAmountOfTokens));
 
         web3.eth.getBalance(owner).should.bignumber.be.equal(ownerPreEtherBalance);
-        web3.eth.getBalance(buyer).should.bignumber.be.lessThan(buyerPreEtherBalance);
+        web3.eth.getBalance(buyer).should.bignumber.be.equal(buyerPreEtherBalance);
       }
     });
   });

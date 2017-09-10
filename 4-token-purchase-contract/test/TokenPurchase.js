@@ -58,13 +58,13 @@ contract('TokenPurchase', accounts => {
               const senderPreEtherBalance = web3.eth.getBalance(purchaser);
               const contractPreEtherBalance = web3.eth.getBalance(tokenPurchase.address);
 
-              transaction = await tokenPurchase.sendTransaction({ from: purchaser, value: buyingPriceInWei });
+              transaction = await tokenPurchase.sendTransaction({ from: purchaser, value: buyingPriceInWei, gasPrice: 0 });
               const priceInWei = await tokenPurchase.priceInWei();
               const tokenPurchaseOpened = await tokenPurchase.tokenPurchaseOpened();
 
               tokenPurchaseOpened.should.be.true;
               priceInWei.should.be.bignumber.equal(buyingPriceInWei);
-              web3.eth.getBalance(purchaser).should.bignumber.be.lessThan(senderPreEtherBalance.minus(buyingPriceInWei));
+              web3.eth.getBalance(purchaser).should.bignumber.be.equal(senderPreEtherBalance.minus(buyingPriceInWei));
               web3.eth.getBalance(tokenPurchase.address).should.bignumber.be.equal(contractPreEtherBalance.plus(buyingPriceInWei));
             });
 
@@ -84,7 +84,7 @@ contract('TokenPurchase', accounts => {
                     const contractPreEtherBalance = web3.eth.getBalance(tokenPurchase.address);
 
                     try {
-                      await tokenPurchase.claim(acceptance.address, { from: owner });
+                      await tokenPurchase.claim(acceptance.address, { from: owner, gasPrice: 0 });
                     } catch(error) {
                       error.message.search('invalid opcode').should.be.above(0);
                     }
@@ -96,7 +96,7 @@ contract('TokenPurchase', accounts => {
                     claimed.should.be.false;
                     tokenPurchaseOpened.should.be.true;
                     buyerTokens.should.be.bignumber.equal(new BigNumber(0));
-                    web3.eth.getBalance(owner).should.be.bignumber.lessThan(ownerPreEtherBalance);
+                    web3.eth.getBalance(owner).should.be.bignumber.equal(ownerPreEtherBalance);
                     web3.eth.getBalance(tokenPurchase.address).should.be.bignumber.equal(contractPreEtherBalance);
                   });
                 });
@@ -150,7 +150,7 @@ contract('TokenPurchase', accounts => {
           const contractPreEtherBalance = web3.eth.getBalance(tokenPurchase.address);
 
           try {
-            transaction = await tokenPurchase.sendTransaction({ from: from, value: value });
+            transaction = await tokenPurchase.sendTransaction({ from: from, value: value, gasPrice: 0 });
           } catch (error) {
             error.message.search('invalid opcode').should.be.above(0);
           }
@@ -159,7 +159,7 @@ contract('TokenPurchase', accounts => {
 
           tokenPurchaseOpened.should.be.false;
           priceInWei.should.be.bignumber.equal(expectedContractPrice);
-          web3.eth.getBalance(from).should.bignumber.be.lessThan(senderPreEtherBalance);
+          web3.eth.getBalance(from).should.bignumber.be.equal(senderPreEtherBalance);
           web3.eth.getBalance(tokenPurchase.address).should.bignumber.be.equal(contractPreEtherBalance);
         }
       });
@@ -179,7 +179,7 @@ contract('TokenPurchase', accounts => {
               const contractPreEtherBalance = web3.eth.getBalance(tokenPurchase.address);
 
               try {
-                await tokenPurchase.claim(acceptance.address, { from: owner });
+                await tokenPurchase.claim(acceptance.address, { from: owner, gasPrice: 0 });
               } catch(error) {
                 error.message.search('invalid opcode').should.be.above(0);
               }
@@ -191,7 +191,7 @@ contract('TokenPurchase', accounts => {
               claimed.should.be.false;
               tokenPurchaseOpened.should.be.false;
               buyerTokens.should.be.bignumber.equal(new BigNumber(0));
-              web3.eth.getBalance(owner).should.be.bignumber.lessThan(ownerPreEtherBalance);
+              web3.eth.getBalance(owner).should.be.bignumber.equal(ownerPreEtherBalance);
               web3.eth.getBalance(tokenPurchase.address).should.be.bignumber.equal(contractPreEtherBalance);
             });
           });
