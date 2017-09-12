@@ -1,12 +1,19 @@
 pragma solidity ^0.4.4;
 
 contract MyToken {
+  string public constant name = "MyToken";
+  string public constant symbol = "MTK";
+  uint256 public constant decimals = 18;
+  uint256 public constant INITIAL_SUPPLY = 10000;
+
   address creator;
+  uint256 totalSupply;
   mapping (address => uint256) balances;
 
-  function MyToken(uint256 amount) {
+  function MyToken() {
     creator = msg.sender;
-    balances[creator] = amount;
+    totalSupply = INITIAL_SUPPLY;
+    balances[creator] = INITIAL_SUPPLY;
   }
 
   function sendTokens(address receiver, uint256 amount) returns (bool) {

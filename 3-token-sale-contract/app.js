@@ -15,7 +15,6 @@ TokenSale.setProvider(provider);
 // Default variables
 let myToken = null;                  // we will keep a reference of the contract once deployed
 const GAS = 1000000;                 // amount of gas to use for the transaction
-const MYTOKEN_INITIAL_AMOUNT = 1000; // default amount of tokens created initially
 
 // Function to show an error message
 const showError = error => {
@@ -46,7 +45,7 @@ const synchAccounts = () => {
 const deployMyToken = event => {
   event.preventDefault();
   let address = $(event.target).siblings(".address").text();
-  MyToken.new(MYTOKEN_INITIAL_AMOUNT, { from: address, gas: GAS }).then(instance => {
+  MyToken.new({ from: address, gas: GAS }).then(instance => {
     myToken = instance;
     $('#mytoken-address').html(`<b>MyToken Address: ${instance.address}</b>`);
     $('#mytoken-contract-address').val(instance.address);

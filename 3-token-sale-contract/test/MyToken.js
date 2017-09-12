@@ -10,15 +10,19 @@ const MyToken = artifacts.require('MyToken');
 contract('MyToken', accounts => {
   let myToken = null;
   const owner = accounts[0];
-  const initialAmountOfTokens = new BigNumber(100);
 
   beforeEach(async function() {
-    myToken = await MyToken.new(initialAmountOfTokens, { from: owner });
+    myToken = await MyToken.new({ from: owner });
   });
 
-  it('should be initialized with given amount', async function () {
+  it('has an initial supply, a amount of decimals, a symbol and a name', async function () {
+    const name = await myToken.name();
+    const symbol = await myToken.symbol();
     const balance = await myToken.balanceOf(owner);
-    balance.should.be.bignumber.equal(initialAmountOfTokens)
+
+    name.should.be.equal('MyToken')
+    symbol.should.be.equal('MTK')
+    balance.should.be.bignumber.equal(new BigNumber(10000))
   });
 
   describe('when an owner send some tokens to a receiver', () => {
@@ -33,14 +37,14 @@ contract('MyToken', accounts => {
         const ownerBalance = await myToken.balanceOf(owner);
         const receiverBalance = await myToken.balanceOf(receiver);
 
-        ownerBalance.should.be.bignumber.equal(new BigNumber(90));
+        ownerBalance.should.be.bignumber.equal(new BigNumber(9990));
         receiverBalance.should.be.bignumber.equal(new BigNumber(10));
         result.logs[0].event.should.be.equal('TokenTransfer');
       });
     });
 
     describe('when sending amount greater than the available', () => {
-      const sendingAmount = new BigNumber(101);
+      const sendingAmount = new BigNumber(10001);
 
       it('does not allow the owner to send that amount and does not send anything', async function () {
         await itDoesNotSendAmount(sendingAmount);
@@ -65,7 +69,7 @@ contract('MyToken', accounts => {
       const ownerBalance = await myToken.balanceOf(owner);
       const receiverBalance = await myToken.balanceOf(receiver);
 
-      ownerBalance.should.be.bignumber.equal(new BigNumber(100));
+      ownerBalance.should.be.bignumber.equal(new BigNumber(10000));
       receiverBalance.should.be.bignumber.equal(new BigNumber(0));
     }
   });

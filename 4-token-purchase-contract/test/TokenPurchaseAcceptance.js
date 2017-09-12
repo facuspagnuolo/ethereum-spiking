@@ -13,10 +13,9 @@ contract('TokenPurchaseAcceptance', accounts => {
   describe('given a tokens contract with an initial owner', async function () {
     let myToken = null;
     const owner = accounts[0];
-    const myTokensInitialAmount = new BigNumber(100);
 
     beforeEach(async function() {
-      myToken = await MyToken.new(myTokensInitialAmount, { from: owner });
+      myToken = await MyToken.new({ from: owner });
     });
 
     describe('given a token purchase contract', async function () {

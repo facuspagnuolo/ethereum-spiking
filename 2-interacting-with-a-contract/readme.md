@@ -10,7 +10,7 @@
 9. `> myTokenABI = JSON.parse(compiledCode.contracts[':MyToken'].interface);`
 10. `> MyTokenContract = web3.eth.contract(myTokenABI);`
 11. `> myTokenByteCode = compiledCode.contracts[':MyToken'].bytecode;`
-12. `> deployedContract = MyTokenContract.new(1000, {data: myTokenByteCode, from: web3.eth.accounts[0], gas: 999999});` feel free to use any account
+12. `> deployedContract = MyTokenContract.new({data: myTokenByteCode, from: web3.eth.accounts[0], gas: 999999});` feel free to use any account
 13. `> deployedContract.address;` you will need this address later 
 14. `> JSON.stringify(myTokenABI);` you will need the contract ABI if you have changed the contract 
 

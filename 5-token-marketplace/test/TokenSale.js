@@ -12,10 +12,9 @@ contract('TokenSale', accounts => {
   describe('given a tokens contract with an initial owner', async function () {
     let myToken = null;
     const owner = accounts[0];
-    const myTokensInitialAmount = new BigNumber(100);
 
     beforeEach(async function() {
-      myToken = await MyToken.new(myTokensInitialAmount, { from: owner });
+      myToken = await MyToken.new({ from: owner });
     });
 
     describe('given a token sale contract', async function () {
@@ -53,7 +52,7 @@ contract('TokenSale', accounts => {
           const contractTokens = await myToken.balanceOf(tokenSale.address);
 
           amount.should.be.bignumber.equal(amountOfTokens);
-          ownerTokens.should.be.bignumber.equal(new BigNumber(90));
+          ownerTokens.should.be.bignumber.equal(new BigNumber(9990));
           contractTokens.should.be.bignumber.equal(amountOfTokens);
         });
 
@@ -71,7 +70,7 @@ contract('TokenSale', accounts => {
               const contractTokens = await myToken.balanceOf(tokenSale.address);
 
               contractTokens.should.be.bignumber.equal(0);
-              ownerTokens.should.be.bignumber.equal(new BigNumber(90));
+              ownerTokens.should.be.bignumber.equal(new BigNumber(9990));
               buyerTokens.should.be.bignumber.equal(new BigNumber(10));
             });
 
@@ -160,6 +159,7 @@ contract('TokenSale', accounts => {
       });
 
       async function assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, sellingAmountOfTokens, weiSendingAmount) {
+        const totalSupply = await myToken.totalSupply();
         const ownerPreEtherBalance = web3.eth.getBalance(owner);
         const buyerPreEtherBalance = web3.eth.getBalance(buyer);
 
@@ -186,7 +186,7 @@ contract('TokenSale', accounts => {
 
         buyerTokens.should.be.bignumber.equal(new BigNumber(0));
         contractTokens.should.be.bignumber.equal(sellingAmountOfTokens);
-        ownerTokens.should.be.bignumber.equal(myTokensInitialAmount.minus(sellingAmountOfTokens));
+        ownerTokens.should.be.bignumber.equal(totalSupply.minus(sellingAmountOfTokens));
 
         web3.eth.getBalance(owner).should.bignumber.be.equal(ownerPreEtherBalance);
         web3.eth.getBalance(buyer).should.bignumber.be.equal(buyerPreEtherBalance);
