@@ -9,10 +9,19 @@
     "browserify": "^14.3.0",
     "jquery": "^3.2.1",
     "watchify": "^3.9.0",
-    "web3": "^1.0.0-beta.13"
+    "web3": "~0.20.1"
   },
   "browserify": {
-    "transform": [ [ "babelify", { "presets": [ "es2015" ] } ] ]
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015"
+          ]
+        }
+      ]
+    ]
   },
   "scripts": {
     "start": "watchify app.js -o bundle.js -v"
