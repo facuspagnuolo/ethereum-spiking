@@ -60,19 +60,19 @@ const updateTransactionInfoFromLink = event => {
 // Show initial accounts state and initialize callback triggers
 synchAccounts();
 $(document).on('change', '#contract-address', e => synchSmartContract());
-$(document).on('click', '.from', e => updateAddressFromLink(e, '#seller-address'));
-$(document).on('click', '.to', e => updateAddressFromLink(e, '#buyer-address'));
+$(document).on('click', '.from', e => updateAddressFromLink(e, '#sender-address'));
+$(document).on('click', '.to', e => updateAddressFromLink(e, '#recipient-address'));
 $(document).on('click', '.transaction', e => updateTransactionInfoFromLink(e));
 
-// Every time we click the buy button, we will
-$('#buy').click(() => {
-  let buyingAmount = $('#buying-amount').val();
-  let buyerAddress = $('#buyer-address').val();
-  let sellerAddress = $('#seller-address').val();
+// Every time we click the send button, we will
+$('#send').click(() => {
+  let sendingAmount = $('#sending-amount').val();
+  let recipientAddress = $('#recipient-address').val();
+  let senderAddress = $('#sender-address').val();
   let contractAddress = $('#contract-address').val();
 
   let contractInstance = MyTokenContract.at(contractAddress);
-  let transactionHash = contractInstance.sendTokens(buyerAddress, buyingAmount, { from: sellerAddress });
+  let transactionHash = contractInstance.sendTokens(recipientAddress, sendingAmount, { from: senderAddress });
   $("#transaction-hash").text(`Tx Hash: ${transactionHash}`);
   $('#transactions-list').append(`<p><a href="#" class="transaction">${transactionHash}</a></p>`);
   synchSmartContract();
