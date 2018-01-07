@@ -1,195 +1,188 @@
-const BigNumber = web3.BigNumber;
-
-require('chai')
-  .use(require('chai-as-promised'))
-  .use(require('chai-bignumber')(BigNumber))
-  .should();
-
-const MyToken = artifacts.require('MyToken');
-const TokenSale = artifacts.require('TokenSale');
+const MyToken = artifacts.require('MyToken')
+const TokenSale = artifacts.require('TokenSale')
 
 contract('TokenSale', accounts => {
   describe('given a tokens contract with an initial owner', async function () {
-    let myToken = null;
-    const owner = accounts[0];
+    let myToken = null
+    const owner = accounts[0]
 
     beforeEach(async function() {
-      myToken = await MyToken.new({ from: owner });
-    });
+      myToken = await MyToken.new({ from: owner })
+    })
 
     describe('given a token sale contract', async function () {
-      let tokenSale = null;
-      const sellingPriceInWei = 100000;
+      let tokenSale = null
+      const sellingPriceInWei = 100000
 
       beforeEach(async function() {
-        tokenSale = await TokenSale.new(myToken.address, sellingPriceInWei, { from: owner });
-      });
+        tokenSale = await TokenSale.new(myToken.address, sellingPriceInWei, { from: owner })
+      })
 
       it('is initialized with a price, the seller, the tokens contract but no tokens for sale', async function () {
-        const seller = await tokenSale.seller();
-        const amount = await tokenSale.amount();
-        const tokenAddress = await tokenSale.token();
-        const sellingPrice = await tokenSale.priceInWei();
-        const tokenSaleClosed = await tokenSale.tokenSaleClosed();
+        const seller = await tokenSale.seller()
+        const amount = await tokenSale.amount()
+        const tokenAddress = await tokenSale.token()
+        const sellingPrice = await tokenSale.priceInWei()
+        const tokenSaleClosed = await tokenSale.tokenSaleClosed()
 
-        seller.should.be.equal(owner);
-        amount.should.be.bignumber.equal(0);
-        tokenAddress.should.be.equal(myToken.address);
-        sellingPrice.should.be.bignumber.equal(sellingPriceInWei);
-        tokenSaleClosed.should.be.false;
-      });
+        assert(seller === owner)
+        assert(amount.eq(0))
+        assert(tokenAddress === myToken.address)
+        assert(sellingPrice.eq(sellingPriceInWei))
+        assert(!tokenSaleClosed)
+      })
 
       describe('when the owner transfer some tokens to the sale contract', async function() {
-        const amountOfTokens = new BigNumber(10);
+        const amountOfTokens = 10
 
         beforeEach(async function() {
-          await myToken.sendTokens(tokenSale.address, amountOfTokens, { from: owner });
-        });
+          await myToken.sendTokens(tokenSale.address, amountOfTokens, { from: owner })
+        })
 
         it('has some tokens for sale', async function () {
-          const amount = await tokenSale.amount();
-          const ownerTokens = await myToken.balanceOf(owner);
-          const contractTokens = await myToken.balanceOf(tokenSale.address);
+          const amount = await tokenSale.amount()
+          const ownerTokens = await myToken.balanceOf(owner)
+          const contractTokens = await myToken.balanceOf(tokenSale.address)
 
-          amount.should.be.bignumber.equal(amountOfTokens);
-          ownerTokens.should.be.bignumber.equal(new BigNumber(9990));
-          contractTokens.should.be.bignumber.equal(amountOfTokens);
-        });
+          assert(amount.eq(amountOfTokens))
+          assert(ownerTokens.eq(9990))
+          assert(contractTokens.eq(amountOfTokens))
+        })
 
         describe('when a buyer sends ether to the token sale contract', async function() {
-          const buyer = accounts[1];
-          let transaction = null;
+          const buyer = accounts[1]
+          let transaction = null
 
           describe('when the amount of ether is equal than the selling price', async function() {
-            const weiSendingAmount = sellingPriceInWei;
+            const weiSendingAmount = sellingPriceInWei
 
             it('transfers the tokens to the buyer', async function () {
-              transaction = await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount });
-              const buyerTokens = await myToken.balanceOf(buyer);
-              const ownerTokens = await myToken.balanceOf(owner);
-              const contractTokens = await myToken.balanceOf(tokenSale.address);
+              transaction = await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount })
+              const buyerTokens = await myToken.balanceOf(buyer)
+              const ownerTokens = await myToken.balanceOf(owner)
+              const contractTokens = await myToken.balanceOf(tokenSale.address)
 
-              contractTokens.should.be.bignumber.equal(0);
-              ownerTokens.should.be.bignumber.equal(new BigNumber(9990));
-              buyerTokens.should.be.bignumber.equal(new BigNumber(10));
-            });
+              assert(contractTokens.eq(0))
+              assert(ownerTokens.eq(9990))
+              assert(buyerTokens.eq(10))
+            })
 
             it('transfers the ether to the seller', async function () {
-              const ownerPreEtherBalance = web3.eth.getBalance(owner);
-              const buyerPreEtherBalance = web3.eth.getBalance(buyer);
+              const ownerPreEtherBalance = web3.eth.getBalance(owner)
+              const buyerPreEtherBalance = web3.eth.getBalance(buyer)
 
-              transaction = await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount, gasPrice: 0 });
+              transaction = await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount, gasPrice: 0 })
 
-              web3.eth.getBalance(owner).should.bignumber.be.equal(ownerPreEtherBalance.plus(weiSendingAmount));
-              web3.eth.getBalance(buyer).should.bignumber.be.equal(buyerPreEtherBalance.minus(weiSendingAmount));
-            });
+              assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance.plus(weiSendingAmount)))
+              assert(web3.eth.getBalance(buyer).eq(buyerPreEtherBalance.minus(weiSendingAmount)))
+            })
 
             it('changes the state of the token sale contract', async function() {
-              await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount });
+              await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount })
 
-              const seller = await tokenSale.seller();
-              const amount = await tokenSale.amount();
-              const tokenAddress = await tokenSale.token();
-              const sellingPrice = await tokenSale.priceInWei();
-              const tokenSaleClosed = await tokenSale.tokenSaleClosed();
+              const seller = await tokenSale.seller()
+              const amount = await tokenSale.amount()
+              const tokenAddress = await tokenSale.token()
+              const sellingPrice = await tokenSale.priceInWei()
+              const tokenSaleClosed = await tokenSale.tokenSaleClosed()
 
-              seller.should.be.equal(owner);
-              amount.should.be.bignumber.equal(0);
-              tokenAddress.should.be.equal(myToken.address);
-              sellingPrice.should.be.bignumber.equal(sellingPriceInWei);
-              tokenSaleClosed.should.be.true;
-            });
+              assert(seller === owner)
+              assert(amount.eq(0))
+              assert(tokenAddress === myToken.address)
+              assert(sellingPrice.eq(sellingPriceInWei))
+              assert(tokenSaleClosed)
+            })
 
             it('triggers a purchase event', async function () {
-              transaction = await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount });
+              transaction = await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount })
 
-              transaction.logs[0].event.should.be.equal('TokenPurchase');
-            });
-          });
+              assert(transaction.logs[0].event === 'TokenPurchase')
+            })
+          })
 
           describe('when the amount of ether is less than the selling price', async function() {
-            const weiSendingAmount = sellingPriceInWei - 1;
+            const weiSendingAmount = sellingPriceInWei - 1
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
-            });
-          });
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount)
+            })
+          })
 
           describe('when the amount of ether is greater than the selling price', async function() {
-            const weiSendingAmount = sellingPriceInWei + 1;
+            const weiSendingAmount = sellingPriceInWei + 1
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
-            });
-          });
-        });
-      });
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount)
+            })
+          })
+        })
+      })
 
       describe('when the owner did not transfer any tokens to the sale contract', async function() {
-        const amountOfTokens = new BigNumber(0);
+        const amountOfTokens = 0
 
         describe('when a buyer sends ether to the token sale contract', async function() {
-          const buyer = accounts[1];
+          const buyer = accounts[1]
 
           describe('when the amount of ether is equal than the selling price', async function() {
-            const weiSendingAmount = sellingPriceInWei;
+            const weiSendingAmount = sellingPriceInWei
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
-            });
-          });
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount)
+            })
+          })
 
           describe('when the amount of ether is less than the selling price', async function() {
-            const weiSendingAmount = sellingPriceInWei - 1;
+            const weiSendingAmount = sellingPriceInWei - 1
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
-            });
-          });
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount)
+            })
+          })
 
           describe('when the amount of ether is greater than the selling price', async function() {
-            const weiSendingAmount = sellingPriceInWei + 1;
+            const weiSendingAmount = sellingPriceInWei + 1
 
             it('does not transfer those tokens nor ether', async function () {
-              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount);
-            });
-          });
-        });
-      });
+              await assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, amountOfTokens, weiSendingAmount)
+            })
+          })
+        })
+      })
 
       async function assertItDoesNotTransferTokensNorEtherAndDoesNotChangeContractState(buyer, sellingAmountOfTokens, weiSendingAmount) {
-        const totalSupply = await myToken.totalSupply();
-        const ownerPreEtherBalance = web3.eth.getBalance(owner);
-        const buyerPreEtherBalance = web3.eth.getBalance(buyer);
+        const totalSupply = await myToken.totalSupply()
+        const ownerPreEtherBalance = web3.eth.getBalance(owner)
+        const buyerPreEtherBalance = web3.eth.getBalance(buyer)
 
         try {
-          await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount, gasPrice: 0 });
+          await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount, gasPrice: 0 })
         } catch(error) {
-          error.message.search('invalid opcode').should.be.above(0);
+          assert(error.message.search('revert') > 0)
         }
 
-        const seller = await tokenSale.seller();
-        const amount = await tokenSale.amount();
-        const tokenAddress = await tokenSale.token();
-        const sellingPrice = await tokenSale.priceInWei();
-        const tokenSaleClosed = await tokenSale.tokenSaleClosed();
-        const buyerTokens = await myToken.balanceOf(buyer);
-        const ownerTokens = await myToken.balanceOf(owner);
-        const contractTokens = await myToken.balanceOf(tokenSale.address);
+        const seller = await tokenSale.seller()
+        const amount = await tokenSale.amount()
+        const tokenAddress = await tokenSale.token()
+        const sellingPrice = await tokenSale.priceInWei()
+        const tokenSaleClosed = await tokenSale.tokenSaleClosed()
+        const buyerTokens = await myToken.balanceOf(buyer)
+        const ownerTokens = await myToken.balanceOf(owner)
+        const contractTokens = await myToken.balanceOf(tokenSale.address)
 
-        seller.should.be.equal(owner);
-        amount.should.be.bignumber.equal(sellingAmountOfTokens);
-        tokenAddress.should.be.equal(myToken.address);
-        sellingPrice.should.be.bignumber.equal(sellingPriceInWei);
-        tokenSaleClosed.should.be.false;
+        assert(seller === owner)
+        assert(amount.eq(sellingAmountOfTokens))
+        assert(tokenAddress === myToken.address)
+        assert(sellingPrice.eq(sellingPriceInWei))
+        assert(!tokenSaleClosed)
 
-        buyerTokens.should.be.bignumber.equal(new BigNumber(0));
-        contractTokens.should.be.bignumber.equal(sellingAmountOfTokens);
-        ownerTokens.should.be.bignumber.equal(totalSupply.minus(sellingAmountOfTokens));
+        assert(buyerTokens.eq(0))
+        assert(contractTokens.eq(sellingAmountOfTokens))
+        assert(ownerTokens.eq(totalSupply.minus(sellingAmountOfTokens)))
 
-        web3.eth.getBalance(owner).should.bignumber.be.equal(ownerPreEtherBalance);
-        web3.eth.getBalance(buyer).should.bignumber.be.equal(buyerPreEtherBalance);
+        assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance))
+        assert(web3.eth.getBalance(buyer).eq(buyerPreEtherBalance))
       }
-    });
-  });
-});
+    })
+  })
+})

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Token Marketplace",
   "main": "app.js",
-  "dependencies": {
+  "devDependencies": {
     "babel-polyfill": "^6.23.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
@@ -15,12 +15,11 @@
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.1",
     "jquery": "~3.2.1",
-    "mocha": "^3.5.0",
-    "truffle": "^3.4.8",
-    "truffle-contract": "^2.0.5",
+    "truffle": "^4.0.4",
+    "truffle-contract": "^3.0.1",
     "watchify": "~3.9.0",
     "web3": "~0.20.1",
-    "zeppelin-solidity": "^1.2.0"
+    "zeppelin-solidity": "^1.4.0"
   },
   "browserify": {
     "transform": [
@@ -37,7 +36,8 @@
     ]
   },
   "scripts": {
-    "start": "watchify app.js -o bundle.js -v"
+    "test": "npx truffle test --gasPrice 0",
+    "start": "npx truffle compile && watchify app.js -o bundle.js -v"
   },
   "author": "facuspagnuolo",
   "license": "ISC"

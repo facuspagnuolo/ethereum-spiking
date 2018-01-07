@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.18;
 
 import './MyToken.sol';
 import './TokenPurchaseAcceptance.sol';
@@ -11,7 +11,7 @@ contract TokenPurchase {
 
   event TokenSold(address buyer, address seller, uint256 price, uint256 amount);
 
-  function TokenPurchase(MyToken _token, uint256 _amount) {
+  function TokenPurchase(MyToken _token, uint256 _amount) public {
     if(_amount <= 0) return;
 
     token = _token;
@@ -20,16 +20,19 @@ contract TokenPurchase {
     tokenPurchaseOpened = false;
   }
 
-  function () payable {
-    uint weiAmount = msg.value;
+  function priceInWei() public constant returns(uint) {
+    return this.balance;
+  }
 
+  function () payable public {
+    uint weiAmount = msg.value;
     require(weiAmount > 0);
     require(msg.sender == buyer);
 
     tokenPurchaseOpened = true;
   }
 
-  function claim(TokenPurchaseAcceptance acceptance) returns(bool){
+  function claim(TokenPurchaseAcceptance acceptance) public returns(bool) {
     address seller = acceptance.seller();
     uint256 acceptanceAmount = token.balanceOf(address(acceptance));
 
@@ -39,16 +42,10 @@ contract TokenPurchase {
 
     tokenPurchaseOpened = false;
 
-    if(acceptance.claim()) {
-      uint balance = this.balance;
-      seller.transfer(balance);
-      TokenSold(buyer, seller, balance, amount);
-      return true;
-    }
-    return false;
-  }
-
-  function priceInWei() constant returns(uint) {
-    return this.balance;
+    if(!acceptance.claim()) return false;
+    uint balance = this.balance;
+    seller.transfer(balance);
+    TokenSold(buyer, seller, balance, amount);
+    return true;
   }
 }

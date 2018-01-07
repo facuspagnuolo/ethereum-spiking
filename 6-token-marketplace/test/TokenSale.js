@@ -166,7 +166,7 @@ contract('TokenSale', accounts => {
         try {
           await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount, gasPrice: 0 });
         } catch(error) {
-          error.message.search('invalid opcode').should.be.above(0);
+          error.message.search('revert').should.be.above(0);
         }
 
         const seller = await tokenSale.owner();

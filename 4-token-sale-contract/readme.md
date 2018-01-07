@@ -1,3 +1,3 @@
 # Running instructions
-1. Run `testrpc` 
-2. Run `npm start` 
+1. Run `npx truffle develop` 
+2. Run `npm start`

@@ -3,7 +3,7 @@ import Web3 from 'web3';
 import contract from 'truffle-contract';
 
 // Instance Web3 using localhost testrpc
-const provider = new Web3.providers.HttpProvider("http://localhost:8545");
+const provider = new Web3.providers.HttpProvider("http://localhost:9545");
 const web3 = new Web3(provider);
 
 // Set up contracts APIs
@@ -188,13 +188,3 @@ $(document).on('click', '.sell', e => updateSellingFormWithAddress(e));
 $(document).on('click', '.apply', e => updateSellingFormWithContract(e));
 $(document).on('click', '.claim', e => claimPurchase(e));
 $(document).on('click', '.transaction', e => updateTransactionInfo(e));
-
-module.exports = {
-  networks: {
-    development: {
-      host: "localhost",
-      port: 8545,
-      network_id: "*" // Match any network id
-    }
-  }
-};

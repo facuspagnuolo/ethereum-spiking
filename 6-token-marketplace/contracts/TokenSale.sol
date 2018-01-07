@@ -1,7 +1,7 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.18;
 
-import '../node_modules/zeppelin-solidity/contracts/token/ERC20.sol';
-import '../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'zeppelin-solidity/contracts/token/ERC20.sol';
+import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract TokenSale is Ownable {
   ERC20 public token;
@@ -10,7 +10,7 @@ contract TokenSale is Ownable {
 
   event TokenPurchase(address buyer, address seller, uint256 price, uint256 amount);
 
-  function TokenSale(ERC20 _token, uint _price) {
+  function TokenSale(ERC20 _token, uint _price) public {
     if (_price < 0) revert();
 
     token = _token;
@@ -18,15 +18,15 @@ contract TokenSale is Ownable {
     closed = false;
   }
 
-  function amount() constant returns(uint256) {
+  function amount() public constant returns(uint256) {
     return token.balanceOf(this);
   }
 
-  function () payable {
+  function () public payable {
     buyTokens(msg.sender);
   }
 
-  function buyTokens(address buyer) payable {
+  function buyTokens(address buyer) public payable {
     uint weiAmount = msg.value;
     uint256 amount = token.balanceOf(this);
 

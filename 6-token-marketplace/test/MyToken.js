@@ -63,7 +63,7 @@ contract('MyToken', accounts => {
       try {
         await myToken.transfer(receiver, sendingAmount, {from: owner});
       } catch (error) {
-        error.message.search('invalid opcode').should.be.above(0);
+        error.message.search('revert').should.be.above(0);
       }
 
       const ownerBalance = await myToken.balanceOf(owner);

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.18;
 
 contract MyToken {
   string public constant name = "MyToken";
@@ -12,15 +12,18 @@ contract MyToken {
 
   event TokenTransfer(address from, address to, uint256 amount);
 
-  function MyToken() {
+  function MyToken() public {
     creator = msg.sender;
     totalSupply = INITIAL_SUPPLY;
     balances[creator] = INITIAL_SUPPLY;
   }
 
-  function sendTokens(address receiver, uint256 amount) returns (bool) {
-    address owner = msg.sender;
+  function balanceOf(address owner) public constant returns (uint256) {
+    return balances[owner];
+  }
 
+  function sendTokens(address receiver, uint256 amount) public returns (bool) {
+    address owner = msg.sender;
     require(amount > 0);
     require(balances[owner] >= amount);
 
@@ -28,9 +31,5 @@ contract MyToken {
     balances[receiver] += amount;
     TokenTransfer(owner, receiver, amount);
     return true;
-  }
-
-  function balanceOf(address owner) constant returns (uint256) {
-    return balances[owner];
   }
 }

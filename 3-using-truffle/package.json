@@ -25,7 +25,8 @@
     ]
   },
   "scripts": {
-    "start": "watchify app.js -o bundle.js -v"
+    "test": "npx truffle test",
+    "start": "npx truffle compile && watchify app.js -o bundle.js -v"
   },
   "author": "facuspagnuolo",
   "license": "ISC"

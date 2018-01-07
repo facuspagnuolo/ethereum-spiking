@@ -84,7 +84,7 @@ contract('TokenPurchase', accounts => {
                   try {
                     await tokenPurchase.claim({ from: owner, gasPrice: 0 });
                   } catch(error) {
-                    error.message.search('invalid opcode').should.be.above(0);
+                    error.message.search('revert').should.be.above(0);
                   }
 
                   const buyerTokens = await myToken.balanceOf(purchaser);
@@ -160,7 +160,7 @@ contract('TokenPurchase', accounts => {
           try {
             transaction = await tokenPurchase.sendTransaction({ from: from, value: value, gasPrice: 0 });
           } catch (error) {
-            error.message.search('invalid opcode').should.be.above(0);
+            error.message.search('revert').should.be.above(0);
           }
           const priceInWei = await tokenPurchase.priceInWei();
           const opened = await tokenPurchase.opened();
@@ -213,7 +213,7 @@ contract('TokenPurchase', accounts => {
             try {
               await tokenPurchase.claim({ from: owner, gasPrice: 0 });
             } catch (error) {
-              error.message.search('invalid opcode').should.be.above(0);
+              error.message.search('revert').should.be.above(0);
             }
 
             const buyerTokens = await myToken.balanceOf(purchaser);
