@@ -19,7 +19,7 @@ contract('TokenSale', accounts => {
       })
 
       it('is initialized with a price, the seller, the tokens contract but no tokens for sale', async function () {
-        const seller = await tokenSale.seller()
+        const seller = await tokenSale.owner()
         const amount = await tokenSale.amount()
         const tokenAddress = await tokenSale.token()
         const sellingPrice = await tokenSale.priceInWei()
@@ -36,7 +36,7 @@ contract('TokenSale', accounts => {
         const amountOfTokens = 10
 
         beforeEach(async function() {
-          await myToken.sendTokens(tokenSale.address, amountOfTokens, { from: owner })
+          await myToken.transfer(tokenSale.address, amountOfTokens, { from: owner })
         })
 
         it('has some tokens for sale', async function () {
@@ -80,7 +80,7 @@ contract('TokenSale', accounts => {
             it('changes the state of the token sale contract', async function() {
               await tokenSale.sendTransaction({ from: buyer, value: weiSendingAmount })
 
-              const seller = await tokenSale.seller()
+              const seller = await tokenSale.owner()
               const amount = await tokenSale.amount()
               const tokenAddress = await tokenSale.token()
               const sellingPrice = await tokenSale.priceInWei()
@@ -161,7 +161,7 @@ contract('TokenSale', accounts => {
           assert(error.message.search('revert') > 0)
         }
 
-        const seller = await tokenSale.seller()
+        const seller = await tokenSale.owner()
         const amount = await tokenSale.amount()
         const tokenAddress = await tokenSale.token()
         const sellingPrice = await tokenSale.priceInWei()

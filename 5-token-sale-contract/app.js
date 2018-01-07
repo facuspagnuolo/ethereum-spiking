@@ -110,16 +110,17 @@ const updateTransactionInfo = event => {
 
 // Every time we click the buy button, we send ether to the TokenSale contract to buy those tokens
 $('#buy').click(() => {
-  let weiAmount = $('#wei-amount').val();
   let buyerAddress = $('#buyer-address').val();
   let tokenSaleContractAddress = $('#tokensale-contract-address').val();
 
   TokenSale.at(tokenSaleContractAddress).then(tokenSale => {
-    console.log(`Buying tokens from ${buyerAddress} by Wei ${weiAmount}`);
-    tokenSale.sendTransaction({ from: buyerAddress, value: weiAmount }).then(response => {
-      synchAccounts();
-      addTransaction(response.tx);
-      updateTokenSaleContractStatus(tokenSale);
+    tokenSale.priceInWei().then(weiAmount => {
+      console.log(`Buying tokens from ${buyerAddress} by Wei ${weiAmount}`);
+      tokenSale.sendTransaction({ from: buyerAddress, value: weiAmount }).then(response => {
+        synchAccounts();
+        addTransaction(response.tx);
+        updateTokenSaleContractStatus(tokenSale);
+      }).catch(showError);
     }).catch(showError);
   }).catch(showError);
 });
@@ -137,7 +138,7 @@ $('#sell').click(() => {
     synchAccounts();
     updateTokenSaleContractStatus(tokenSale);
 
-    myToken.sendTokens(tokenSale.address, amount, { from: sellerAddress, gas: GAS }).then(response => {
+    myToken.transfer(tokenSale.address, amount, { from: sellerAddress, gas: GAS }).then(response => {
       addTransaction(response.tx);
       synchAccounts();
       updateTokenSaleContractStatus(tokenSale);
