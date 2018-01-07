@@ -5,12 +5,12 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract TokenSale is Ownable {
   ERC20 public token;
-  uint public priceInWei;
+  uint256 public priceInWei;
   bool public closed;
 
   event TokenPurchase(address buyer, address seller, uint256 price, uint256 amount);
 
-  function TokenSale(ERC20 _token, uint _price) public {
+  function TokenSale(ERC20 _token, uint256 _price) public {
     if (_price < 0) revert();
 
     token = _token;
@@ -27,7 +27,7 @@ contract TokenSale is Ownable {
   }
 
   function buyTokens(address buyer) public payable {
-    uint weiAmount = msg.value;
+    uint256 weiAmount = msg.value;
     uint256 amount = token.balanceOf(this);
 
     require(amount > 0);

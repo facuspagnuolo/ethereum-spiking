@@ -18,7 +18,7 @@ contract TokenPurchase is Ownable {
     opened = false;
   }
 
-  function priceInWei() public constant returns(uint) {
+  function priceInWei() public constant returns(uint256) {
     return this.balance;
   }
 
@@ -38,7 +38,7 @@ contract TokenPurchase is Ownable {
     opened = false;
 
     if(!token.transferFrom(seller, owner, amount)) revert();
-    uint balance = this.balance;
+    uint256 balance = this.balance;
     seller.transfer(balance);
     TokenSold(owner, seller, balance, amount);
     return true;
