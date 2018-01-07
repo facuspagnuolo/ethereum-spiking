@@ -8,15 +8,11 @@ contract('MyToken', accounts => {
     myToken = await MyToken.new({ from: owner })
   })
 
-  it('has a total supply, a amount of decimals, a symbol and a name', async function () {
-    const name = await myToken.name()
-    const symbol = await myToken.symbol()
-    const decimals = await myToken.decimals()
+  it('has a total supply and owner', async function () {
+    const tokenOwner = await myToken.owner()
     const totalSupply = await myToken.totalSupply()
 
-    assert(name === 'MyToken')
-    assert(symbol === 'MTK')
-    assert(decimals.eq(18))
+    assert(tokenOwner === owner)
     assert(totalSupply.eq(10000))
   })
 
@@ -33,14 +29,14 @@ contract('MyToken', accounts => {
       const sendingAmount = 10
 
       it('allows the owner to send that amount of tokens', async function () {
-        const { logs } = await myToken.sendTokens(receiver, sendingAmount, { from: owner })
+        const { logs } = await myToken.transfer(receiver, sendingAmount, { from: owner })
 
         const ownerBalance = await myToken.balanceOf(owner)
         const receiverBalance = await myToken.balanceOf(receiver)
 
         assert(ownerBalance.eq(9990))
         assert(receiverBalance.eq(10))
-        assert(logs[0].event === 'TokenTransfer')
+        assert(logs[0].event === 'Transfer')
       })
     })
 
@@ -62,7 +58,7 @@ contract('MyToken', accounts => {
 
     async function itDoesNotSendAmount(sendingAmount) {
       try {
-        await myToken.sendTokens(receiver, sendingAmount, {from: owner})
+        await myToken.transfer(receiver, sendingAmount, {from: owner})
       } catch (error) {
         assert(error.message.search('revert') > 0)
       }

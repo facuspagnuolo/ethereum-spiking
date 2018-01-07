@@ -1,13 +1,12 @@
 pragma solidity ^0.4.18;
 
 import './MyToken.sol';
-import './TokenPurchaseAcceptance.sol';
+import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
-contract TokenPurchase {
+contract TokenPurchase is Ownable {
   MyToken public token;
-  address public buyer;
   uint256 public amount;
-  bool public tokenPurchaseOpened;
+  bool public opened;
 
   event TokenSold(address buyer, address seller, uint256 price, uint256 amount);
 
@@ -16,36 +15,32 @@ contract TokenPurchase {
 
     token = _token;
     amount = _amount;
-    buyer = msg.sender;
-    tokenPurchaseOpened = false;
+    opened = false;
   }
 
-  function priceInWei() public constant returns(uint) {
+  function priceInWei() public constant returns(uint256) {
     return this.balance;
   }
 
-  function () payable public {
-    uint weiAmount = msg.value;
-    require(weiAmount > 0);
-    require(msg.sender == buyer);
+  function () public payable onlyOwner {
+    require(msg.value > 0);
 
-    tokenPurchaseOpened = true;
+    opened = true;
   }
 
-  function claim(TokenPurchaseAcceptance acceptance) public returns(bool) {
-    address seller = acceptance.seller();
-    uint256 acceptanceAmount = token.balanceOf(address(acceptance));
+  function claim() public returns(bool) {
+    address seller = msg.sender;
+    uint256 allowedTokens = token.allowance(seller, address(this));
 
-    require(tokenPurchaseOpened);
-    require(buyer == msg.sender);
-    require(acceptanceAmount >= amount);
+    require(opened);
+    require(allowedTokens >= amount);
 
-    tokenPurchaseOpened = false;
+    opened = false;
 
-    if(!acceptance.claim()) return false;
-    uint balance = this.balance;
+    if(!token.transferFrom(seller, owner, amount)) revert();
+    uint256 balance = this.balance;
     seller.transfer(balance);
-    TokenSold(buyer, seller, balance, amount);
+    TokenSold(owner, seller, balance, amount);
     return true;
   }
 }

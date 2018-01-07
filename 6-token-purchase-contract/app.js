@@ -9,10 +9,8 @@ const web3 = new Web3(provider);
 // Set up contracts APIs
 const MyToken = contract(require('./build/contracts/MyToken.json'));
 const TokenPurchase = contract(require('./build/contracts/TokenPurchase.json'));
-const TokenPurchaseAcceptance = contract(require('./build/contracts/TokenPurchaseAcceptance.json'));
 MyToken.setProvider(provider);
 TokenPurchase.setProvider(provider);
-TokenPurchaseAcceptance.setProvider(provider);
 
 // Default variables
 let myToken = null;                  // we will keep a reference of the contract once deployed
@@ -90,18 +88,6 @@ const updateTokenPurchaseContractStatus = tokenPurchase => {
   tokenPurchase.tokenPurchaseOpened().then(opened => list.find(`#${address}`).find(".opened").html(`Opened ${opened}`)).catch(showError);
 };
 
-// We will use this function in order to update the status of a token purchase acceptance contracts
-const updateTokenPurchaseAcceptanceContractStatus = acceptance => {
-  let address = acceptance.address;
-  const list = $('#token-purchase-acceptance-contracts');
-  const contractDetails = `<a href="#" class="claim">claim</a> <span class="address">${address}</span> | <span class="tokens">Tokens</span> | <span class="claimed">Claimed </span>`;
-  const acceptanceElement = list.find(`#${address}`);
-
-  acceptanceElement.length ? acceptanceElement.html(contractDetails) : list.append(`<p id="${address}">${contractDetails}</p>`);
-  myToken.balanceOf(acceptance.address).then(tokens => list.find(`#${address}`).find(".tokens").html(`Tokens ${tokens}`)).catch(showError);
-  acceptance.claimed().then(claimed => list.find(`#${address}`).find(".claimed").html(`Claimed ${claimed}`)).catch(showError);
-};
-
 // Every time we click a transaction we will look for its details into the blockchain
 const updateTransactionInfo = event => {
   event.preventDefault();
@@ -120,26 +106,6 @@ const updateTransactionInfo = event => {
       $("#transaction-info").find("#value").text(transactionInfo.value);
     }
   });
-};
-
-const claimPurchase = event => {
-  event.preventDefault();
-  let address = $(event.target).siblings(".address").text();
-  TokenPurchaseAcceptance.at(address).then(acceptance => {
-    acceptance.tokenPurchase().then(tokenPurchaseAddress => {
-      TokenPurchase.at(tokenPurchaseAddress).then(tokenPurchase => {
-        tokenPurchase.buyer().then(buyerAddress => {
-          console.log(`Buyer ${buyerAddress} claiming ${tokenPurchaseAddress} through acceptance ${acceptance.address}`);
-          tokenPurchase.claim(acceptance.address, { from: buyerAddress, gas: GAS }).then(response => {
-            addTransaction(response.tx);
-            updateTokenPurchaseContractStatus(tokenPurchase);
-            updateTokenPurchaseAcceptanceContractStatus(acceptance);
-            synchAccounts();
-          }).catch(showError);
-        }).catch(showError);
-      }).catch(showError);
-    }).catch(showError);
-  }).catch(showError);
 };
 
 // Every time we click the buy button, we send ether to the TokenPurchase contract to buy those tokens
@@ -166,14 +132,12 @@ $('#sell').click(() => {
   console.log(`Seller ${sellerAddress} applying to purchase ${tokenPurchaseContractAddress}`);
   TokenPurchase.at(tokenPurchaseContractAddress).then(tokenPurchase => {
     tokenPurchase.amount().then(amount => {
-      TokenPurchaseAcceptance.new(myToken.address, tokenPurchase.address, { from: sellerAddress, gas: GAS }).then(acceptance => {
-        addTransaction(acceptance.transactionHash);
+      myToken.approve(tokenPurchase.address, amount, { from: sellerAddress, gas: GAS }).then(approval => {
+        addTransaction(approval.transactionHash);
         synchAccounts();
-        updateTokenPurchaseAcceptanceContractStatus(acceptance);
-        myToken.sendTokens(acceptance.address, amount, { from: sellerAddress, gas: GAS }).then(response => {
-          addTransaction(response.tx);
+        tokenPurchase.claim({ from: seller, gas: GAS }).then(claim => {
+          addTransaction(claim.tx);
           synchAccounts();
-          updateTokenPurchaseAcceptanceContractStatus(acceptance);
         }).catch(showError);
       }).catch(showError);
     }).catch(showError);
@@ -186,5 +150,4 @@ $(document).on('click', '.deploy', e => deployMyToken(e));
 $(document).on('click', '.buy', e => updateBuyingFormWithAddress(e));
 $(document).on('click', '.sell', e => updateSellingFormWithAddress(e));
 $(document).on('click', '.apply', e => updateSellingFormWithContract(e));
-$(document).on('click', '.claim', e => claimPurchase(e));
 $(document).on('click', '.transaction', e => updateTransactionInfo(e));

@@ -1,14 +1,14 @@
 const MyToken = artifacts.require('MyToken')
 const TokenPurchase = artifacts.require('TokenPurchase')
-const TokenPurchaseAcceptance = artifacts.require('TokenPurchaseAcceptance')
 
 contract('TokenPurchase', accounts => {
   describe('given a tokens contract with an initial owner', async function () {
     let myToken = null
     const owner = accounts[0]
+    const myTokensInitialAmount = 100
 
     beforeEach(async function() {
-      myToken = await MyToken.new({ from: owner })
+      myToken = await MyToken.new(myTokensInitialAmount, { from: owner })
     })
 
     describe('given a token purchase contract', async function () {
@@ -21,7 +21,7 @@ contract('TokenPurchase', accounts => {
       })
 
       it('is initialized with the buyer, the amount of tokens to buy, and the tokens contract', async function () {
-        const buyer = await tokenPurchase.buyer()
+        const buyer = await tokenPurchase.owner()
         const amount = await tokenPurchase.amount()
         const tokenAddress = await tokenPurchase.token()
 
@@ -32,9 +32,9 @@ contract('TokenPurchase', accounts => {
 
       it('is not opened and does not have ether initially', async function () {
         const priceInWei = await tokenPurchase.priceInWei()
-        const tokenPurchaseOpened = await tokenPurchase.tokenPurchaseOpened()
+        const opened = await tokenPurchase.opened()
 
-        assert(!tokenPurchaseOpened)
+        assert(!opened)
         assert(priceInWei.eq(0))
       })
 
@@ -52,70 +52,79 @@ contract('TokenPurchase', accounts => {
 
               transaction = await tokenPurchase.sendTransaction({ from: purchaser, value: buyingPriceInWei, gasPrice: 0 })
               const priceInWei = await tokenPurchase.priceInWei()
-              const tokenPurchaseOpened = await tokenPurchase.tokenPurchaseOpened()
+              const opened = await tokenPurchase.opened()
 
-              assert(tokenPurchaseOpened)
+              assert(opened)
               assert(priceInWei.eq(buyingPriceInWei))
               assert(web3.eth.getBalance(purchaser).eq(senderPreEtherBalance.minus(buyingPriceInWei)))
               assert(web3.eth.getBalance(tokenPurchase.address).eq(contractPreEtherBalance.plus(buyingPriceInWei)))
             })
 
-            describe('when an owner creates a purchase acceptance contract', async function () {
-              let acceptance = null
-
+            describe('when an owner approves some tokens to the purchase contract', async function () {
               beforeEach(async function() {
                 transaction = await tokenPurchase.sendTransaction({ from: purchaser, value: buyingPriceInWei })
-                acceptance = await TokenPurchaseAcceptance.new(myToken.address, tokenPurchase.address, { from: owner })
               })
 
-              describe('when the owner did not transfer the requested amount of tokens to the acceptance contract', async function () {
-
-                describe('when the owner claims the money to the buyer', async function () {
-                  it('does not transfer the money to the seller nor the tokens to the buyer', async function() {
-                    const ownerPreEtherBalance = web3.eth.getBalance(owner)
-                    const contractPreEtherBalance = web3.eth.getBalance(tokenPurchase.address)
-
-                    try {
-                      await tokenPurchase.claim(acceptance.address, { from: owner, gasPrice: 0 })
-                    } catch(error) {
-                      assert(error.message.search('revert') > 0)
-                    }
-
-                    const claimed = await acceptance.claimed()
-                    const buyerTokens = await myToken.balanceOf(purchaser)
-                    const tokenPurchaseOpened = await tokenPurchase.tokenPurchaseOpened()
-
-                    assert(!claimed)
-                    assert(tokenPurchaseOpened)
-                    assert(buyerTokens.eq(0))
-                    assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance))
-                    assert(web3.eth.getBalance(tokenPurchase.address).eq(contractPreEtherBalance))
-                  })
-                })
-              })
-
-              describe('when the owner transfers the requested amount of tokens to the acceptance contract', async function () {
+              describe('when an owner approved less than the requested amount of tokens to the purchase contract', async function () {
                 beforeEach(async function() {
-                  await myToken.sendTokens(acceptance.address, buyingAmountOfTokens, { from: owner })
+                  await myToken.approve(tokenPurchase.address, buyingAmountOfTokens - 1, { from: owner })
                 })
 
-                describe('when the owner claims the money to the buyer', async function () {
-                  it('transfers the money to the seller and the tokens to the buyer', async function() {
-                    const ownerPreEtherBalance = web3.eth.getBalance(owner)
+                it('does not transfer the money to the seller nor the tokens to the buyer', async function() {
+                  const ownerPreEtherBalance = web3.eth.getBalance(owner)
+                  const contractPreEtherBalance = web3.eth.getBalance(tokenPurchase.address)
 
-                    await tokenPurchase.claim(acceptance.address, { from: purchaser })
-                    const claimed = await acceptance.claimed()
-                    const tokenPurchaseOpen = await tokenPurchase.tokenPurchaseOpened()
-                    const buyerTokens = await myToken.balanceOf(purchaser)
-                    const acceptanceTokens = await myToken.balanceOf(acceptance.address)
+                  try {
+                    await tokenPurchase.claim({ from: owner, gasPrice: 0 })
+                  } catch(error) {
+                    assert(error.message.search('revert') > 0)
+                  }
 
-                    assert(claimed)
-                    assert(!tokenPurchaseOpen)
-                    assert(buyerTokens.eq(buyingAmountOfTokens))
-                    assert(acceptanceTokens.eq(0))
-                    assert(web3.eth.getBalance(tokenPurchase.address).eq(0))
-                    assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance.plus(buyingPriceInWei)))
-                  })
+                  const buyerTokens = await myToken.balanceOf(purchaser)
+                  const opened = await tokenPurchase.opened()
+
+                  assert(opened)
+                  assert(buyerTokens.eq(0))
+                  assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance))
+                  assert(web3.eth.getBalance(tokenPurchase.address).eq(contractPreEtherBalance))
+                })
+              })
+
+              describe('when the owner approved the requested amount of tokens to the purchase contract', async function () {
+                beforeEach(async function() {
+                  await myToken.approve(tokenPurchase.address, buyingAmountOfTokens, { from: owner })
+                })
+
+                it('transfers the money to the seller and the tokens to the buyer', async function() {
+                  const ownerPreEtherBalance = web3.eth.getBalance(owner)
+
+                  await tokenPurchase.claim({ from: owner, gasPrice: 0 })
+                  const opened = await tokenPurchase.opened()
+                  const buyerTokens = await myToken.balanceOf(purchaser)
+
+                  assert(!opened)
+                  assert(buyerTokens.eq(buyingAmountOfTokens))
+                  assert(web3.eth.getBalance(tokenPurchase.address).eq(0))
+                  assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance.plus(buyingPriceInWei)))
+                })
+              })
+
+              describe('when the owner approved more than the requested amount of tokens to the purchase contract', async function () {
+                beforeEach(async function() {
+                  await myToken.approve(tokenPurchase.address, buyingAmountOfTokens + 1, { from: owner })
+                })
+
+                it('transfers the money to the seller and the tokens to the buyer', async function() {
+                  const ownerPreEtherBalance = web3.eth.getBalance(owner)
+
+                  await tokenPurchase.claim({ from: owner, gasPrice: 0 })
+                  const opened = await tokenPurchase.opened()
+                  const buyerTokens = await myToken.balanceOf(purchaser)
+
+                  assert(!opened)
+                  assert(buyerTokens.eq(buyingAmountOfTokens))
+                  assert(web3.eth.getBalance(tokenPurchase.address).eq(0))
+                  assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance.plus(buyingPriceInWei)))
                 })
               })
             })
@@ -147,46 +156,67 @@ contract('TokenPurchase', accounts => {
             assert(error.message.search('revert') > 0)
           }
           const priceInWei = await tokenPurchase.priceInWei()
-          const tokenPurchaseOpened = await tokenPurchase.tokenPurchaseOpened()
+          const opened = await tokenPurchase.opened()
 
-          assert(!tokenPurchaseOpened)
+          assert(!opened)
           assert(priceInWei.eq(expectedContractPrice))
           assert(web3.eth.getBalance(from).eq(senderPreEtherBalance))
           assert(web3.eth.getBalance(tokenPurchase.address).eq(contractPreEtherBalance))
         }
       })
 
-      describe('when the buyer did not transfer ether to the purchase contract', async function() {
+      describe('when no ether was transferred to the purchase contract', async function() {
 
-        describe('when an owner creates a purchase acceptance contract', async function () {
-          let acceptance = null
+        describe('when an owner approves some tokens to the buyer', async function () {
 
-          beforeEach(async function() {
-            acceptance = await TokenPurchaseAcceptance.new(myToken.address, tokenPurchase.address, { from: owner })
-          })
+          describe('when an owner approved less than the requested amount of tokens to the purchase contract', async function () {
+            beforeEach(async function() {
+              await myToken.approve(tokenPurchase.address, buyingAmountOfTokens - 1, { from: owner })
+            })
 
-          describe('when the owner claims the money to the buyer', async function () {
             it('does not transfer the money to the seller nor the tokens to the buyer', async function() {
-              const ownerPreEtherBalance = web3.eth.getBalance(owner)
-              const contractPreEtherBalance = web3.eth.getBalance(tokenPurchase.address)
-
-              try {
-                await tokenPurchase.claim(acceptance.address, { from: owner, gasPrice: 0 })
-              } catch(error) {
-                assert(error.message.search('revert') > 0)
-              }
-
-              const claimed = await acceptance.claimed()
-              const buyerTokens = await myToken.balanceOf(purchaser)
-              const tokenPurchaseOpened = await tokenPurchase.tokenPurchaseOpened()
-
-              assert(!claimed)
-              assert(!tokenPurchaseOpened)
-              assert(buyerTokens.eq(0))
-              assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance))
-              assert(web3.eth.getBalance(tokenPurchase.address).eq(contractPreEtherBalance))
+              await itDoesNotTransferTheTokens()
             })
           })
+
+          describe('when the owner approved the requested amount of tokens to the purchase contract', async function () {
+            beforeEach(async function() {
+              await myToken.approve(tokenPurchase.address, buyingAmountOfTokens, { from: owner })
+            })
+
+            it('does not transfer the money to the seller nor the tokens to the buyer', async function() {
+              await itDoesNotTransferTheTokens()
+            })
+          })
+
+          describe('when the owner approved more than the requested amount of tokens to the purchase contract', async function () {
+            beforeEach(async function() {
+              await myToken.approve(tokenPurchase.address, buyingAmountOfTokens + 1, { from: owner })
+            })
+
+            it('does not transfer the money to the seller nor the tokens to the buyer', async function() {
+              await itDoesNotTransferTheTokens()
+            })
+          })
+
+          async function itDoesNotTransferTheTokens() {
+            const ownerPreEtherBalance = web3.eth.getBalance(owner)
+            const contractPreEtherBalance = web3.eth.getBalance(tokenPurchase.address)
+
+            try {
+              await tokenPurchase.claim({ from: owner, gasPrice: 0 })
+            } catch (error) {
+              assert(error.message.search('revert') > 0)
+            }
+
+            const buyerTokens = await myToken.balanceOf(purchaser)
+            const opened = await tokenPurchase.opened()
+
+            assert(!opened)
+            assert(buyerTokens.eq(0))
+            assert(web3.eth.getBalance(owner).eq(ownerPreEtherBalance))
+            assert(web3.eth.getBalance(tokenPurchase.address).eq(contractPreEtherBalance))
+          }
         })
       })
     })
