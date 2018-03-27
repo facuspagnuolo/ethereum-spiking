@@ -14,7 +14,7 @@ const synchAccounts = () => {
   });
 };
 
-// This callback just avoids us to copy & past every time you want to use an address
+// This callback just avoids us to copy & paste every time you want to use an address
 const updateAddressFromLink = (event, inputSelector) => {
   event.preventDefault();
   $(inputSelector).val($(event.target).siblings(".address").text());
