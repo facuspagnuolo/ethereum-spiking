@@ -1,6 +1,6 @@
 # Deploying instructions
 1. Run `npm install`
-2. Run `testrpc`
+2. Run `npx testrpc`
 3. Open node console and run:
 ```js
 Web3 = require('web3')
@@ -16,5 +16,7 @@ deployedContract.address //you will need this address later
 ```
 
 # Running instructions
-1. Run `npm start`
-2. Open `index.html` and start playing
+1. Run `npm install` 
+2. Run `npx testrpc` 
+3. Open `index.html` and start playing 
+4. Run `npm start` if are editing any JS file
